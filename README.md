@@ -1,7 +1,7 @@
 pylcs
 =====
 
-A Python implementation of [Learning Classifier Systems](http://code.ulb.ac.be/dbfiles/HolBooCol-etal2000lcs.pdf).
+A Python interface to [Learning Classifier Systems](http://code.ulb.ac.be/dbfiles/HolBooCol-etal2000lcs.pdf).
 
 Implemented underneath in C++ and integraged via Cython. *Currently their is a memory leak issue*.
 
@@ -69,3 +69,12 @@ python setup.py install
 ```
 
 This original code was written back in 2002 for my Master's thesis ["Dynamically Developing Novel and Useful Behaviours: a First Step in Animat Creativity"](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.10.7447&rep=rep1&type=pdf).
+
+TODO:
+
+* Fix/test more - especially memory!
+* Expose parameter get/set functions.
+* Generalise LCS class/interface.
+* Implement a strength-based Michigan LCS (e.g. ZCS) 
+* Implement a Pittsburgh style LCS (e.g. GALE).
+* Implement any number of LCS for different problem/representations (see table 1 of ["Learning Classifier Systems: A Complete Introduction, Review, and Roadmap"](http://www.hindawi.com/archive/2009/736398/abs/)).
