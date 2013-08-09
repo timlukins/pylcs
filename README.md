@@ -7,7 +7,7 @@ Implemented underneath in C++ and integraged via Cython. *Currently their is a m
 
 Here is an example solving the 6-multiplexer problem.
 
-![Test run of 6-multiplexor]{6multiplex.png}
+![Test run of 6-multiplexor](6multiplex.png)
 
 
 ```

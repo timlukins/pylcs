@@ -30,7 +30,7 @@ while True:
   if (act==multiplexer(percept)):
     lcs.giveReward(1000)
   # Terminate if run too long or performance good
-  if t[-1]==1000: # or p[-1]<0.1: 
+  if t[-1]==1000: # or p[-1]>0.7: 
     break
 
 # Plot results
