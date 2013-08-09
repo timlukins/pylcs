@@ -56,7 +56,7 @@ Only the [eXtendend Classifier System (XCS)](http://link.springer.com/content/pd
 
 Make sure you have cython installed - e.g. `pip install cython`
 
-Then build en-situ with:
+Then build *in situ* with:
 
 ```	
 python setup.py build_ext --inplace
