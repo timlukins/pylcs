@@ -1,16 +1,16 @@
 pylcs
 =====
 
-A Python implementation of [Learning Classifier Systems](http://code.ulb.ac.be/dbfiles/HolBooCol-etal2000lcs.pdf) 
+A Python implementation of [Learning Classifier Systems](http://code.ulb.ac.be/dbfiles/HolBooCol-etal2000lcs.pdf).
 
-Implemented underneath in C++ and integraged via Cython. *Currently their is a memory leak issue* 
+Implemented underneath in C++ and integraged via Cython. *Currently their is a memory leak issue*.
 
-Here is an example solving the 6-multiplexer problem.
+Here is an example solving the 6-multiplexer problem...
 
 ![Test run of 6-multiplexor](6multiplex.png)
 
 
-```
+```python
 import pylcs
 import matplotlib.pyplot as plt
 from random import randint
@@ -68,4 +68,4 @@ Or install with:
 python setup.py install
 ```
 
-This original code was written back in 2002 for my Master's thesis ["Dynamically Developing Novel and Useful Behaviours: a First Step in Animat Creativity"](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.10.7447&rep=rep1&type=pdf) 
+This original code was written back in 2002 for my Master's thesis ["Dynamically Developing Novel and Useful Behaviours: a First Step in Animat Creativity"](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.10.7447&rep=rep1&type=pdf).
