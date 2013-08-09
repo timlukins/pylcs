@@ -5,7 +5,7 @@ A Python interface to [Learning Classifier Systems](http://code.ulb.ac.be/dbfile
 
 Implemented underneath in C++ and integraged via Cython. *Currently there is a memory leak issue*.
 
-Here is an example solving the 6-multiplexer problem (i.e. decode first 2 bits for index of value held in last 4 bits)...
+Here is an example solving the 6-multiplexer problem (i.e. first 2 bits = index of value held in last 4 bits)...
 
 ![Test run of 6-multiplexor](6multiplex.png)
 
