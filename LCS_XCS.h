@@ -57,7 +57,6 @@ namespace LCS {
 
 		// Definitions:
 
-		//enum	Feature			{ZERO=0, ONE=1};
 		typedef int Feature;	
 		typedef vector<Feature> Perception;
 		typedef long			Action;
@@ -129,8 +128,6 @@ namespace LCS {
 			void assign(vector<Symbol>,Action,double,double,double,unsigned long,unsigned long, unsigned long, unsigned long);
 
 			friend class XCS;
-			//friend ostream& operator<<(ostream&, const Classifier&);
-			//friend istream& operator>>(istream&, Classifier&);
 		};
 
 	private:

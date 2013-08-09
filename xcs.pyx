@@ -13,7 +13,8 @@ cdef extern from "LCS_XCS.h" namespace "LCS":
 		XCS(vector[long])
 		# public variables
 		double BETA
-		double GAMMA # etc
+		double GAMMA
+		double EPSILON
 		# Methods	
 		long act(vector[int])
 		void update(long)
@@ -21,7 +22,7 @@ cdef extern from "LCS_XCS.h" namespace "LCS":
 		long populationSize()
 		double internalPerformance()
 		unsigned long currentTime()
-
+		
 ###############################################################################
 
 cdef class xcs:
@@ -29,7 +30,7 @@ cdef class xcs:
 	
 	def __cinit__(self,actions):
 		self.thisptr = new XCS(actions)
-	
+
 	def __dealloc__(self):
 		del self.thisptr
 	
@@ -48,3 +49,4 @@ cdef class xcs:
 
 	def giveReward(self,amount):
 		self.thisptr.update(amount)
+

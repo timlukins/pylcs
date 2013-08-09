@@ -29,25 +29,25 @@ ostream& operator<<(ostream& stream, const LCS::XCS::Classifier& cl) {
 	}
 
 	return stream
-		<< con << ","
-		<< (LCS::XCS::Action)cl._action << "," 
-		<< (double)cl._prediction << ","
-		<< (double)cl._error << ","
-		<< (double)cl._fitness << ","
-		<< (unsigned long)cl._experience << ","
-		<< (unsigned long)cl._timestamp << ","
-		<< (unsigned long)cl._actionsetsize << ","
+		<< con << " "
+		<< (LCS::XCS::Action)cl._action << " " 
+		<< (double)cl._prediction << " "
+		<< (double)cl._error << " "
+		<< (double)cl._fitness << " "
+		<< (unsigned long)cl._experience << " "
+		<< (unsigned long)cl._timestamp << " "
+		<< (unsigned long)cl._actionsetsize << " "
 		<< (unsigned long)cl._numerosity;
 }
 
 /**
  * Input of classifier:
  */ 
-/*
-istream& operator>>(istream& stream, XCS::Classifier& cl) {
+
+istream& operator>>(istream& stream, LCS::XCS::Classifier& cl) {
 
 	string c;
-	XCS::Action a;
+	LCS::XCS::Action a;
 	double p;
 	double e;
 	double f;
@@ -58,16 +58,15 @@ istream& operator>>(istream& stream, XCS::Classifier& cl) {
 
 	// TODO: check no end of line...
 
-	stream >> c >> "," >> a >> "," >> p >> "," >> e >> "," >> f 
-			 >> "," >> x >> "," >> t >> "," >> s >> "," >> n;
+	stream >> c >>  a >>  p >> e >> f >>  x  >> t  >> s  >> n;
 
 	// Break up condition...
-	vector<XCS::Classifier::Symbol> con;
+	vector<LCS::XCS::Classifier::Symbol> con;
 	for (int sym=0;sym<c.size(); sym++) {
 		switch(c[sym]) {
-			case '1': con.push_back(XCS::Classifier::Symbol::ONCE); break;
-			case '0': con.push_back(XCS::Classifier::Symbol::ZERO); break;
-			case '#': con.push_back(XCS::Classifier::Symbol::DONT); break;
+			case '1': con.push_back(LCS::XCS::Classifier::ONCE); break;
+			case '0': con.push_back(LCS::XCS::Classifier::ZERO); break;
+			case '#': con.push_back(LCS::XCS::Classifier::DONT); break;
 			default: break; // ignore
 		}
 	}
@@ -77,7 +76,6 @@ istream& operator>>(istream& stream, XCS::Classifier& cl) {
 
 	return stream;
 }
-*/
 
 using namespace LCS;
 
