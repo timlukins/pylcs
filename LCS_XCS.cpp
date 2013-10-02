@@ -6,6 +6,20 @@ An implementation of the eXtended Classifier System (XCS).
 Tim Lukins (2002)
 
 ==================================
+
+Can also be built to test standalone with:
+
+	g++ -g -DTEST -o xcs LCS_XCS.cpp
+
+And memory tested then with:
+
+  valgrind --tool=memcheck -v ./xcs
+
+Followed by this (to see where exactly):
+
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes -v ./xcs
+
+==================================
 */
 
 #pragma warning(disable: 4786) // Freakin' M$!
@@ -501,10 +515,12 @@ void XCS::applyGA() {
 			Classifier* ma = selectOffspring();
 
 			// Copy some new, inexperienced children...
-			Classifier* jack = pa->copy();
-			Classifier* jill = ma->copy();
+			Classifier* jack = new Classifier(*pa);//->copy();
+			Classifier* jill = new Classifier(*ma);//->copy();
 			jack->_numerosity = jill->_numerosity = 1;
 			jack->_experience = jill->_experience = 0;
+			bool doJack = false;
+			bool doJill = false;
 
 			// Possibly some crossover...
 			if (drand() < XU) {
@@ -522,16 +538,25 @@ void XCS::applyGA() {
 
 			// Check for subsumption...
 			if (doSubsumption) {
-				if (doesSubsume(pa,jack) || doesSubsume(pa,jill))
+				if (doesSubsume(pa,jack) || doesSubsume(pa,jill)) {
 					pa->_numerosity++;
-				else
+				}
+				else {
 					insertIntoPopulation(jack);
-				if (doesSubsume(ma,jack) || doesSubsume(ma,jill))
+					doJack = true;
+				}
+				if (doesSubsume(ma,jack) || doesSubsume(ma,jill)) {
 					ma->_numerosity++;
-				else
+				}
+				else {
 					insertIntoPopulation(jill);
+					doJill = true;
+				}
+				if (!doJill)	
+					delete(jill); // We're not going to use jill
+				if (!doJack)	
+					delete(jack); // We're not going to use jack
 			}
-
 			// Add kids to population anyway...
 			else {
 				insertIntoPopulation(jack);
@@ -667,8 +692,8 @@ void XCS::deleteFromPopulation(){
 			
 			// And remove it completely (if numerosity zero)...
 			if ((*a)->_numerosity==0)
-				delete(*a); // DEALLOC
 				_population.erase(a); 
+				//delete(*a); // DEALLOC
 
 			// Only update that one classifier...
 			return;
@@ -720,7 +745,7 @@ void XCS::doActionSetSubsumption() {
 				//if (found==_population.end())
 				_population.erase(found); // TODO Check iterator OK in this case...
 				_actionset.erase(c);
-				delete(*c); // DEALLOC
+				//delete(*c); // DEALLOC
 			}
 		}
 	}
@@ -742,12 +767,11 @@ bool XCS::couldSubsume(Classifier* cl) {
 
 long XCS::countGenerality(Classifier* cl) {
 
-	long total;
+	long total = 0;
 	// Total number of times DONT(HASH) occurs...
 	for (int s=0; s<cl->_condition.size(); s++)
 		if (cl->_condition[s]==XCS::Classifier::DONT) total++;
 	return total;
-
 }
 
 /**
@@ -810,6 +834,12 @@ double XCS::drand() {
 
 /**
  * Testing with XOR problem
+ *
+ * NOTE: handy to then run this in valgrind as:
+ *    > valgrind --tool=memcheck --leak-check=full ./xcs
+ * to reveal the exact location of any leaks (if you build with -g).
+ * See also:
+ *   http://stackoverflow.com/questions/3982036/how-can-i-use-valgrind-with-python-c-extensions
  */
 
 void XCS::test() {
@@ -822,96 +852,106 @@ void XCS::test() {
 
 	THETAACT=_actions.size(); // Directly set
 
-	cout << "Time = " << _time++ << endl;;
+	// If you do this 1000 times you should flush memory issues...
 
-	//cout << "Drand = " << drand() << endl;
+	for (int i=0;i<=1000;i++) {
 
-	int situation = ((int)(drand()*100))%4; // i.e. 00,01,10, or 11
+		cout << "Time = " << _time++ << endl;;
 
-	_percept.clear();
-	switch(situation) {
-	case 0: {
-		cout << "Percept -> [00]" << endl;
-		_percept.push_back(0);
-		_percept.push_back(0);
-		break;
+		//cout << "Drand = " << drand() << endl;
+
+		int situation = ((int)(drand()*100))%4; // i.e. 00,01,10, or 11
+
+		_percept.clear();
+		switch(situation) {
+		case 0: {
+			cout << "Percept -> [00]" << endl;
+			_percept.push_back(0);
+			_percept.push_back(0);
+			break;
+		}
+		case 1: {
+			cout << "Percept -> [01]" << endl;
+			_percept.push_back(0);
+			_percept.push_back(1);
+			break;
+		}
+		case 2: {
+			cout << "Percept -> [10]" << endl;
+			_percept.push_back(1);
+			_percept.push_back(0);
+			break;
+		}
+		case 3: {
+			cout << "Percept -> [11]" << endl;
+			_percept.push_back(1);
+			_percept.push_back(1);
+			break;
+		}
+		}
+
+		ClassifierIter cl;
+
+		cout << "+++ Generating match set +++" << endl;
+
+		generateMatchset();
+
+		for (cl = _matchset.begin();cl!=_matchset.end(); cl++)
+			cout << "In matchset: " << *(*cl) << endl;
+
+		cout << "+++ Selecting action +++" << endl;
+
+		selectAction();
+
+		cout << "Action chosen: " << _proposed << endl;
+
+		// Calculate if correct action chosen...
+
+		if (_proposed==1 && (situation==1 || situation==2)) // i.e. 1 on 10 or 01
+			_reward = 1000;
+		else if (_proposed==0 && (situation==0 || situation==3)) // i.e. 0 on 00 or 11
+			_reward = 1000;
+		else
+			_reward = -1000;
+
+		cout << "Reward of " << _reward << endl;
+
+		if (_reward>0) _reinforced++;
+
+		cout << "+++ Generating action set +++" << endl;
+
+		generateActionSet();
+
+		for (cl = _actionset.begin();cl!=_actionset.end(); cl++)
+			cout << "In actionset: " << *(*cl) << endl;
+
+		cout << "+++ Updating predictions +++" << endl;
+
+		updatePrediction();
+
+		for (cl = _population.begin();cl!=_population.end(); cl++)
+			cout << "In population: " << *(*cl) << endl;
+
+		cout << "+++ Applying GA +++" << endl;
+
+		applyGA();
+
+		for (cl = _population.begin();cl!=_population.end(); cl++)
+			cout << "In population: " << *(*cl) << endl;
+
+		cout << "+++ Pop size = " << populationSize() << " +++" << endl;
+		cout << "+++ Int Perf = " << internalPerformance() << " +++" << endl; 
+
 	}
-	case 1: {
-		cout << "Percept -> [01]" << endl;
-		_percept.push_back(0);
-		_percept.push_back(1);
-		break;
-	}
-	case 2: {
-		cout << "Percept -> [10]" << endl;
-		_percept.push_back(1);
-		_percept.push_back(0);
-		break;
-	}
-	case 3: {
-		cout << "Percept -> [11]" << endl;
-		_percept.push_back(1);
-		_percept.push_back(1);
-		break;
-	}
-	}
-
-	ClassifierIter cl;
-
-	cout << "+++ Generating match set +++" << endl;
-
-	generateMatchset();
-
-	for (cl = _matchset.begin();cl!=_matchset.end(); cl++)
-		cout << "In matchset: " << *(*cl) << endl;
-
-	cout << "+++ Selecting action +++" << endl;
-
-	selectAction();
-
-	cout << "Action chosen: " << _proposed << endl;
-
-	// Calculate if correct action chosen...
-
-	if (_proposed==1 && (situation==1 || situation==2)) // i.e. 1 on 10 or 01
-		_reward = 1000;
-	else if (_proposed==0 && (situation==0 || situation==3)) // i.e. 0 on 00 or 11
-		_reward = 1000;
-	else
-		_reward = -1000;
-
-	cout << "Reward of " << _reward << endl;
-
-	if (_reward>0) _reinforced++;
-
-	cout << "+++ Generating action set +++" << endl;
-
-	generateActionSet();
-
-	for (cl = _actionset.begin();cl!=_actionset.end(); cl++)
-		cout << "In actionset: " << *(*cl) << endl;
-
-	cout << "+++ Updating predictions +++" << endl;
-
-	updatePrediction();
-
-	for (cl = _population.begin();cl!=_population.end(); cl++)
-		cout << "In population: " << *(*cl) << endl;
-
-	cout << "+++ Applying GA +++" << endl;
-
-	applyGA();
-
-	for (cl = _population.begin();cl!=_population.end(); cl++)
-		cout << "In population: " << *(*cl) << endl;
-
-	cout << "+++ Pop size = " << populationSize() << " +++" << endl;
-	cout << "+++ Int Perf = " << internalPerformance() << " +++" << endl; 
 
 	cout << "+++END+++" << endl;
 }
 
-int main(int argv,char** argc) { XCS::Actions acts; XCS dummy(acts); dummy.test(); }
+int main(int argv,char** argc) { 
+	XCS::Actions acts; 
+	XCS dummy(acts); 
+	dummy.test(); 
+}
 
 #endif 
 
@@ -933,11 +973,38 @@ XCS::Classifier::Classifier(XCS* sys) {
 }
 
 /**
+ * Copy:
+ */
+
+//XCS::Classifier* XCS::Classifier::copy() {
+XCS::Classifier::Classifier(const XCS::Classifier& other) {
+
+	//XCS::Classifier* dup = new XCS::Classifier(this->_system); // ALLOC
+
+	this->_system;
+
+	// ERRORS HERE ON COPY...
+	//std::copy(other._condition.begin(),other._condition.end(),this->_condition.begin());
+  this->_condition = other._condition;//vector<Symbol>(other._condition);	
+  /////////////////////////////	
+	this->_action = other._action;
+	this->_prediction = other._prediction;
+	this->_error = other._error;
+	this->_fitness = other._fitness;
+	this->_experience = other._experience;
+	this->_timestamp = other._timestamp;
+	this->_actionsetsize = other._actionsetsize;
+	this->_numerosity = other._numerosity;
+}
+
+
+/**
  * Destructor:
  */
 
 XCS::Classifier::~Classifier() {
 
+	this->_condition.clear();
 }
 
 /**
@@ -978,27 +1045,6 @@ void XCS::Classifier::cover(Perception sigma, Action act) {
 	_numerosity		= 1;
 
 
-}
-
-/**
- * Copy:
- */
-
-XCS::Classifier* XCS::Classifier::copy() {
-
-	XCS::Classifier* dup = new XCS::Classifier(this->_system); // ALLOC
-
-	std::copy(this->_condition.begin(),this->_condition.end(),dup->_condition.begin());
-	dup->_action = this->_action;
-	dup->_prediction = this->_prediction;
-	dup->_error = this->_error;
-	dup->_fitness = this->_fitness;
-	dup->_experience = this->_experience;
-	dup->_timestamp = this->_timestamp;
-	dup->_actionsetsize = this->_actionsetsize;
-	dup->_numerosity = this->_numerosity;
-	
-	return dup;
 }
 
 /**

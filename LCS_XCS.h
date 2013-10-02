@@ -120,11 +120,12 @@ namespace LCS {
 		public:
 
 			Classifier(XCS*);
+			Classifier(const Classifier&);
 			virtual ~Classifier();
 
 			bool matches(Perception);
 			void cover(Perception,Action);
-			Classifier* copy();
+			//Classifier* copy();
 			void assign(vector<Symbol>,Action,double,double,double,unsigned long,unsigned long, unsigned long, unsigned long);
 
 			friend class XCS;
