@@ -23,6 +23,7 @@ Tim Lukins (2002)
 #include <sstream>
 #include <ctime>
 #include <cmath>
+#include <memory>
 
 using namespace std;
 

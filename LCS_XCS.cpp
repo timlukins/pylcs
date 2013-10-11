@@ -334,6 +334,9 @@ void XCS::generateMatchset() {
 
 			// Generate covering classifier in population...
 			Classifier* response = new Classifier(this); // ALLOC
+		  // Was trying this...	
+			//Classifier* response = make_shared<Classifier>(this); // ALLOC
+
 			// Find random action not present in Matchset
 			Action rand = _actions[0];
 			do {
@@ -490,7 +493,7 @@ void XCS::updateFitness() {
   */
 
 void XCS::applyGA() {
-
+	
 	// Calculate timestamp average and numerosity...
 	long sumtimestamp = 0;
 	long sumnumerosity = 0;
@@ -502,6 +505,7 @@ void XCS::applyGA() {
 	// See if the GA actually needs to be applied...
 	double avgtime = sumtimestamp;
 	if (sumnumerosity!=0) sumtimestamp/=sumnumerosity; // Shouldn't happen really....
+	
 	if ((_time - avgtime) > THETAGA) {
 
 		// It's GA time!
@@ -509,11 +513,14 @@ void XCS::applyGA() {
 
 			// Update timestamp of this classifier...
 			(*cl)->_timestamp = _time;
-
+	
 			// Select two parents...
 			Classifier* pa = selectOffspring();
 			Classifier* ma = selectOffspring();
-
+/*
+			if (pa==NULL || ma==NULL)
+				return; // Population is too small I think...
+			
 			// Copy some new, inexperienced children...
 			Classifier* jack = new Classifier(*pa);//->copy();
 			Classifier* jill = new Classifier(*ma);//->copy();
@@ -562,7 +569,7 @@ void XCS::applyGA() {
 				insertIntoPopulation(jack);
 				insertIntoPopulation(jill);
 			}
-
+			*/
 			// Cull the population if necessary...
 			deleteFromPopulation();
 		}
@@ -574,6 +581,11 @@ void XCS::applyGA() {
  */
 
 XCS::Classifier* XCS::selectOffspring() {
+
+	// If no classifiers, return null
+	
+	if (_actionset.size()==0)
+		return NULL;
 
 	// Total up all fitness...
 	double fitsum = 0.0;
@@ -692,8 +704,8 @@ void XCS::deleteFromPopulation(){
 			
 			// And remove it completely (if numerosity zero)...
 			if ((*a)->_numerosity==0)
-				_population.erase(a); 
 				//delete(*a); // DEALLOC
+				_population.erase(a); 
 
 			// Only update that one classifier...
 			return;
