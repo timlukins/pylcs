@@ -22,7 +22,6 @@ Followed by this (to see where exactly):
 ==================================
 */
 
-//#pragma warning(disable: 4786) // Freakin' M$!
 #include "LCS_XCS.h"
 
 // In global namespace... polymorphism of ostream << and istream >>
@@ -122,7 +121,7 @@ XCS::XCS(XCS::Actions acts) {
 	THETAACT= _actions.size();    // Number of possible actions.
 
 	// Default control options...
-	doSubsumption	= false; // Subsumption is applied both to action set and GA
+	doSubsumption	= true; // Subsumption is applied both to action set and GA
 	doLearning		= true; // Create an action set, update it, and apply GA
 
 	// Reset internal metrics...
@@ -515,19 +514,17 @@ void XCS::applyGA() {
 			(*cl)->_timestamp = _time;
 	
 			// Select two parents...
-			Classifier* pa = selectOffspring();
-			Classifier* ma = selectOffspring();
+			Classifier* pa = selectParent();
+			Classifier* ma = selectParent();
 
 			if (pa==NULL || ma==NULL)
 				return; // Population is too small I think...
 			
 			// Copy some new, inexperienced children...
-			Classifier* jack = new Classifier(*pa);//->copy(); // ALLOC
-			Classifier* jill = new Classifier(*ma);//->copy(); // ALLOC
+			Classifier* jack = new Classifier(*pa); // ALLOC
+			Classifier* jill = new Classifier(*ma); // ALLOC
 			jack->_numerosity = jill->_numerosity = 1;
 			jack->_experience = jill->_experience = 0;
-			bool doJack = false;
-			bool doJill = false;
 
 			// Possibly some crossover...
 			if (drand() < XU) {
@@ -544,26 +541,30 @@ void XCS::applyGA() {
 				applyMutation(jill);
 
 			// Check for subsumption...
+			bool pabest, mabest;
 			if (doSubsumption) {
-				if (doesSubsume(pa,jack) || doesSubsume(pa,jill)) {
-					pa->_numerosity++;
+
+				pabest=doesSubsume(pa,jack);
+				mabest=doesSubsume(ma,jack);
+				if (pabest || mabest) {
+					if (pabest) pa->_numerosity++;
+					if (mabest) ma->_numerosity++;
+					delete(jack); // We're not going to use jack //DEALLOC
 				}
 				else {
 					insertIntoPopulation(jack);
-					doJack = true;
 				}
 
-				if (doesSubsume(ma,jack) || doesSubsume(ma,jill)) {
-					ma->_numerosity++;
+				pabest=doesSubsume(pa,jill);
+				mabest=doesSubsume(ma,jill);
+				if (pabest || mabest) {
+					if (pabest) pa->_numerosity++;
+					if (mabest) ma->_numerosity++;
+					delete(jill); // We're not going to use jill //DEALLOC
 				}
 				else {
 					insertIntoPopulation(jill);
-					doJill = true;
 				}
-				if (!doJill)	
-					delete(jill); // We're not going to use jill //DEALLOC
-				if (!doJack)	
-					delete(jack); // We're not going to use jack //DEALLOC
 			}
 			// Add kids to population anyway...
 			else {
@@ -577,19 +578,16 @@ void XCS::applyGA() {
 }
 
 /**
- * Select offspring
+ * Select parent 
  */
 
-XCS::Classifier* XCS::selectOffspring() {
+XCS::Classifier* XCS::selectParent() {
 
 	// If no classifiers, return null
 	
 	if (_actionset.size()==0)
 		return NULL;
-	else
-		return *(_actionset.begin());
 
-	/*
 	// Total up all fitness...
 	double fitsum = 0.0;
 	for (ClassifierIter f = _actionset.begin();f!=_actionset.end(); f++) 
@@ -603,11 +601,13 @@ XCS::Classifier* XCS::selectOffspring() {
 	ClassifierIter cl;
 	for (cl=_actionset.begin();cl!=_actionset.end(); cl++) {
 		fitsum += (*cl)->_fitness;
-		if (fitsum > spin) break;
+		if (fitsum >= spin) break;
 	}
 
-	return *cl;
-	*/
+	if (cl==_actionset.end()) // Could potentialy go off end... TODO: shouldn't happen
+	  return NULL; 
+  else
+	  return *cl;
 }
 
 /**
@@ -745,26 +745,24 @@ void XCS::doActionSetSubsumption() {
 		if (couldSubsume(*a)) {
 			if (cl == NULL ||
 				countGenerality(*a) > countGenerality(cl) ||
-				((countGenerality(*a) == countGenerality(cl)) && 
-				(drand() < 0.5))) {
-				cl = (*a);
+				((countGenerality(*a) == countGenerality(cl)) && (drand() < 0.5))) 
+			{
+				  cl = (*a);
+			}
+		}
+	}
+	
+	// Eliminate any classifiers subsumed by this one...
+	if (cl!=NULL) {
+		for (ClassifierIter c = _actionset.begin();c!=_actionset.end(); c++) {
+			if (moreGeneral(cl,(*c))) {
+				//cl->_numerosity += (*c)->_numerosity; // This line can cause thread issues
+				//_actionset.erase(c); // This is the real problem <--------------------------------------------------!
+				break;
 			}
 		}
 	}
 
-	// Eliminate any classifiers subsumed by this one...
-	if (cl!=NULL) {
-		for (ClassifierIter c = _actionset.begin();c!=_actionset.end(); c++) {
-			if (moreGeneral(cl,*c)) {
-				cl->_numerosity += (*c)->_numerosity;
-				ClassifierIter found = find(_population.begin(),_population.end(),*c);
-				//if (found==_population.end())
-				_population.erase(found); // TODO Check iterator OK in this case...
-				_actionset.erase(c);
-				//delete(*c); // DEALLOC
-			}
-		}
-	}
 }
 
 /**
@@ -815,7 +813,7 @@ bool XCS::moreGeneral(Classifier* gen, Classifier* spec) {
 bool XCS::doesSubsume(Classifier* sub, Classifier* tos) {
 
 	// Predicate...
-	if (sub->_action == tos->_action && couldSubsume(sub) && moreGeneral(sub,tos))
+	if (sub->_action==tos->_action && couldSubsume(sub) && moreGeneral(sub,tos))
 		return true;
 	else
 		return false;
@@ -983,20 +981,13 @@ XCS::Classifier::Classifier(XCS* sys) {
 }
 
 /**
- * Copy:
+ * Explicit Copy Constructor:
  */
-
-//XCS::Classifier* XCS::Classifier::copy() {
+/*
 XCS::Classifier::Classifier(const XCS::Classifier& other) {
 
-	//XCS::Classifier* dup = new XCS::Classifier(this->_system); // ALLOC
-
 	this->_system = other._system;
-
-	// ERRORS HERE ON COPY...
-	//std::copy(other._condition.begin(),other._condition.end(),this->_condition.begin());
-  this->_condition = other._condition;//vector<Symbol>(other._condition);	
-  /////////////////////////////	
+  this->_condition = other._condition;// Vector copy
 	this->_action = other._action;
 	this->_prediction = other._prediction;
 	this->_error = other._error;
@@ -1006,7 +997,7 @@ XCS::Classifier::Classifier(const XCS::Classifier& other) {
 	this->_actionsetsize = other._actionsetsize;
 	this->_numerosity = other._numerosity;
 }
-
+*/
 
 /**
  * Destructor:
@@ -1014,7 +1005,7 @@ XCS::Classifier::Classifier(const XCS::Classifier& other) {
 
 XCS::Classifier::~Classifier() {
 
-	this->_condition.clear();
+	//this->_condition.clear();
 }
 
 /**

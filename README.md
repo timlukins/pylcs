@@ -76,7 +76,7 @@ TODO:
 
 Where to start? Well if there was time...
 
-* ~~Fix/test more - especially memory!~~
+* ~~Fix/test more - especially memory!~~ *Substantially investigated with valgrind in conjunction with multiple runs of test.py on MacOS/clang compiled.* 
 * Expose parameter get/set functions.
 * Show it working on a more "real world" problem!
 * Generalise LCS class/interface.
