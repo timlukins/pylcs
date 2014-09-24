@@ -1,4 +1,4 @@
-import sys
+import sys # Wee trick when running in same directory as module
 sys.path.append('..')
 
 import pylcs
@@ -34,9 +34,9 @@ while True:
     break
 
 # Plot results
-plt.subplot(2,1,1)
-plt.plot(t,p,'r-'); plt.ylabel('Performance')
-plt.subplot(2,1,2)
+ax1 = plt.subplot(2,1,1)
+plt.plot(t,p,'r-'); plt.ylabel('Performance'); ax1.set_ylim([0,1.0])
+ax2 = plt.subplot(2,1,2)
 plt.plot(t,s,'b-'); plt.ylabel('Population')
 plt.xlabel('Time')
 plt.show()

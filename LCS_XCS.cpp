@@ -22,7 +22,7 @@ Followed by this (to see where exactly):
 ==================================
 */
 
-#pragma warning(disable: 4786) // Freakin' M$!
+//#pragma warning(disable: 4786) // Freakin' M$!
 #include "LCS_XCS.h"
 
 // In global namespace... polymorphism of ostream << and istream >>
@@ -106,7 +106,7 @@ XCS::XCS(XCS::Actions acts) {
 
 	// Sensible default values...
 	BETA	= 0.15;
-	GAMMA	= 0,71;
+	GAMMA	= 0.71;
 	ALPHA	= 0.1;
 	ERROR	= 10;   // ideally 1% of max reward
  	VAL		= 5;
@@ -122,7 +122,7 @@ XCS::XCS(XCS::Actions acts) {
 	THETAACT= _actions.size();    // Number of possible actions.
 
 	// Default control options...
-	doSubsumption	= true; // Subsumption is applied both to action set and GA
+	doSubsumption	= false; // Subsumption is applied both to action set and GA
 	doLearning		= true; // Create an action set, update it, and apply GA
 
 	// Reset internal metrics...
@@ -189,8 +189,8 @@ void XCS::load(istream& from) {
 	string line;
 	while(from >> line) {
 		// Create new classifier and renew it with data...
-		Classifier* renewed = new Classifier(this); // ALLOC
-		istringstream fline(line);
+		//Classifier* renewed = new Classifier(this); // ALLOC
+		//istringstream fline(line);
 		//fline >> *renewed;
 	}
 }
@@ -517,13 +517,13 @@ void XCS::applyGA() {
 			// Select two parents...
 			Classifier* pa = selectOffspring();
 			Classifier* ma = selectOffspring();
-/*
+
 			if (pa==NULL || ma==NULL)
 				return; // Population is too small I think...
 			
 			// Copy some new, inexperienced children...
-			Classifier* jack = new Classifier(*pa);//->copy();
-			Classifier* jill = new Classifier(*ma);//->copy();
+			Classifier* jack = new Classifier(*pa);//->copy(); // ALLOC
+			Classifier* jill = new Classifier(*ma);//->copy(); // ALLOC
 			jack->_numerosity = jill->_numerosity = 1;
 			jack->_experience = jill->_experience = 0;
 			bool doJack = false;
@@ -552,6 +552,7 @@ void XCS::applyGA() {
 					insertIntoPopulation(jack);
 					doJack = true;
 				}
+
 				if (doesSubsume(ma,jack) || doesSubsume(ma,jill)) {
 					ma->_numerosity++;
 				}
@@ -560,16 +561,15 @@ void XCS::applyGA() {
 					doJill = true;
 				}
 				if (!doJill)	
-					delete(jill); // We're not going to use jill
+					delete(jill); // We're not going to use jill //DEALLOC
 				if (!doJack)	
-					delete(jack); // We're not going to use jack
+					delete(jack); // We're not going to use jack //DEALLOC
 			}
 			// Add kids to population anyway...
 			else {
 				insertIntoPopulation(jack);
 				insertIntoPopulation(jill);
 			}
-			*/
 			// Cull the population if necessary...
 			deleteFromPopulation();
 		}
@@ -586,7 +586,10 @@ XCS::Classifier* XCS::selectOffspring() {
 	
 	if (_actionset.size()==0)
 		return NULL;
+	else
+		return *(_actionset.begin());
 
+	/*
 	// Total up all fitness...
 	double fitsum = 0.0;
 	for (ClassifierIter f = _actionset.begin();f!=_actionset.end(); f++) 
@@ -604,6 +607,7 @@ XCS::Classifier* XCS::selectOffspring() {
 	}
 
 	return *cl;
+	*/
 }
 
 /**
@@ -660,6 +664,7 @@ void XCS::insertIntoPopulation(Classifier* poss){
 
 		if ((*cl)->_condition == poss->_condition && (*cl)->_action  == poss->_action) {
 			(*cl)->_numerosity++;
+			delete(poss); // DEALLOC - this is a dupe, so delete it 
 			return; // i.e. Don't add poss
 		}
 	}
@@ -704,7 +709,7 @@ void XCS::deleteFromPopulation(){
 			
 			// And remove it completely (if numerosity zero)...
 			if ((*a)->_numerosity==0)
-				//delete(*a); // DEALLOC
+				delete(*a); // DEALLOC 
 				_population.erase(a); 
 
 			// Only update that one classifier...
@@ -736,7 +741,6 @@ void XCS::doActionSetSubsumption() {
 
 	// Find  the most general classifier in the action set...
 	Classifier* cl = NULL;
-	int c;
 	for (ClassifierIter a = _actionset.begin();a!=_actionset.end(); a++) {
 		if (couldSubsume(*a)) {
 			if (cl == NULL ||
@@ -846,12 +850,6 @@ double XCS::drand() {
 
 /**
  * Testing with XOR problem
- *
- * NOTE: handy to then run this in valgrind as:
- *    > valgrind --tool=memcheck --leak-check=full ./xcs
- * to reveal the exact location of any leaks (if you build with -g).
- * See also:
- *   http://stackoverflow.com/questions/3982036/how-can-i-use-valgrind-with-python-c-extensions
  */
 
 void XCS::test() {
@@ -993,7 +991,7 @@ XCS::Classifier::Classifier(const XCS::Classifier& other) {
 
 	//XCS::Classifier* dup = new XCS::Classifier(this->_system); // ALLOC
 
-	this->_system;
+	this->_system = other._system;
 
 	// ERRORS HERE ON COPY...
 	//std::copy(other._condition.begin(),other._condition.end(),this->_condition.begin());

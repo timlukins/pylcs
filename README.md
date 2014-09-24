@@ -68,7 +68,9 @@ Or install with:
 python setup.py install
 ```
 
-This original code was written back in 2002 for my Master's thesis ["Dynamically Developing Novel and Useful Behaviours: a First Step in Animat Creativity"](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.10.7447&rep=rep1&type=pdf).
+You can run the above example by typing `python test.py`.
+
+This original code was written back in 2002 for my Master's thesis ["Dynamically Developing Novel and Useful Behaviours: a First Step in Animat Creativity"](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.10.7447&rep=rep1&type=pdf). This is now distributed under the [MIT Licence](LICENCE).
 
 TODO:
 
