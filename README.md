@@ -15,7 +15,7 @@ import pylcs
 import matplotlib.pyplot as plt
 from random import randint
 
-# Define muliplexer 'fitness' function
+# Define multiplexer 'fitness' function
 def multiplexer(bits,addrlen=2):
   return bits[int(reduce(lambda x,y: str(y)+str(x),bits[0:addrlen]),base=2)]
 
@@ -68,12 +68,17 @@ Or install with:
 python setup.py install
 ```
 
-This original code was written back in 2002 for my Master's thesis ["Dynamically Developing Novel and Useful Behaviours: a First Step in Animat Creativity"](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.10.7447&rep=rep1&type=pdf).
+You can run the above example by typing `python test.py`.
+
+This original code was written back in 2002 for my Master's thesis ["Dynamically Developing Novel and Useful Behaviours: a First Step in Animat Creativity"](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.10.7447&rep=rep1&type=pdf). This is now distributed under the [MIT Licence](LICENCE).
 
 TODO:
 
-* Fix/test more - especially memory!
+Where to start? Well if there was time...
+
+* ~~Fix/test more - especially memory!~~ *Substantially investigated with valgrind in conjunction with multiple runs of test.py on MacOS/clang compiled.* 
 * Expose parameter get/set functions.
+* Show it working on a more "real world" problem!
 * Generalise LCS class/interface.
 * Implement a strength-based Michigan LCS (e.g. ZCS) 
 * Implement a Pittsburgh style LCS (e.g. GALE).

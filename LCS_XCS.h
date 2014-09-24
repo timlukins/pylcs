@@ -23,6 +23,7 @@ Tim Lukins (2002)
 #include <sstream>
 #include <ctime>
 #include <cmath>
+#include <memory>
 
 using namespace std;
 
@@ -120,11 +121,11 @@ namespace LCS {
 		public:
 
 			Classifier(XCS*);
+			//Classifier(const Classifier&); not needed as default one will work
 			virtual ~Classifier();
 
 			bool matches(Perception);
 			void cover(Perception,Action);
-			Classifier* copy();
 			void assign(vector<Symbol>,Action,double,double,double,unsigned long,unsigned long, unsigned long, unsigned long);
 
 			friend class XCS;
@@ -168,7 +169,7 @@ namespace LCS {
 		void updatePrediction();
 		void updateFitness();
 		void applyGA();
-		XCS::Classifier* selectOffspring();
+		XCS::Classifier* selectParent();
 		void applyCrossover(Classifier*,Classifier*);
 		void applyMutation(Classifier*);
 		void insertIntoPopulation(Classifier*);
