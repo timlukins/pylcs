@@ -52,6 +52,7 @@ ax2 = plt.subplot(2,1,2)
 plt.plot(t,s,'b-'); plt.ylabel('Population')
 plt.xlabel('Time')
 plt.show()
+```
 
 Only the [eXtendend Classifier System (XCS)](http://link.springer.com/content/pdf/10.1007/s005000100111.pdf) is currently implemented.
 
