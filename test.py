@@ -5,7 +5,7 @@ import pylcs
 import matplotlib.pyplot as plt
 from random import randint
 
-# Define muliplexor 'fitness' function
+# Define muliplexer 'fitness' function
 def multiplex(bits,addrlen=2):
   return bits[int(reduce(lambda x,y: str(y)+str(x),bits[0:addrlen]),base=2)]
 
@@ -15,7 +15,7 @@ lcs = pylcs.xcs([0,1])
 # Set up to record time, performance and population
 t = []; p = []; s = []
 
-# Change the learning rate aand exploration probablity...
+# Change the learning rate and exploration probability...
 lcs.BETA = 0.015
 lcs.EPSILON = 0.1
 

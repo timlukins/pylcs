@@ -3,9 +3,9 @@ pylcs
 
 A Python interface to [Learning Classifier Systems](http://code.ulb.ac.be/dbfiles/HolBooCol-etal2000lcs.pdf).
 
-Implemented underneath in C++ and integraged via Cython.
+Implemented underneath in C++ and integrated via Cython. So it's very fast!
 
-Here is an example solving the 6-multiplexer problem (i.e. first 2 bits = index of value held in last 4 bits)...
+Here is an example solving the 6-multiplexer problem (where the first 2 bits = index of value held in last 4 bits)...
 
 ![Test run of 6-multiplexor](6multiplex.png)
 
@@ -15,7 +15,7 @@ import pylcs
 import matplotlib.pyplot as plt
 from random import randint
 
-# Define muliplexor 'fitness' function
+# Define muliplexer 'fitness' function
 def multiplex(bits,addrlen=2):
   return bits[int(reduce(lambda x,y: str(y)+str(x),bits[0:addrlen]),base=2)]
 
@@ -25,7 +25,7 @@ lcs = pylcs.xcs([0,1])
 # Set up to record time, performance and population
 t = []; p = []; s = []
 
-# Change the learning rate aand exploration probablity...
+# Change the learning rate and exploration probability...
 lcs.BETA = 0.015
 lcs.EPSILON = 0.1
 
@@ -54,9 +54,9 @@ plt.xlabel('Time')
 plt.show()
 ```
 
-Only the [eXtendend Classifier System (XCS)](http://link.springer.com/content/pdf/10.1007/s005000100111.pdf) is currently implemented.
+Only the [eXtendend Classifier System (XCS)](http://link.springer.com/content/pdf/10.1007/s005000100111.pdf) is currently implemented. The core C++ code follows this paper exactly - so it should form a good basis for documentation and learning how it operates. 
 
-Make sure you have cython installed - e.g. `pip install cython`
+To run, make sure you have cython installed - e.g. `pip install cython`
 
 Then build *in situ* with:
 
