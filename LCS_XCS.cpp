@@ -623,8 +623,8 @@ void XCS::applyCrossover(Classifier* one, Classifier* two){
 	// Switch over the symbols at those positions...
 	for (int i=from; i<to; i++) {
 		XCS::Classifier::Symbol temp	= one->_condition[i];
-		one->_condition[i]				= two->_condition[i];
-		two->_condition[i]				= temp;
+		one->_condition[i] = two->_condition[i];
+		two->_condition[i] = temp;
 	}
 }
 
